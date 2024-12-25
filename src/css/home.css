@@ -1,0 +1,58 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #32cd32;
+  margin-top: 1rem;
+}
+
+/* Buttons */
+.navigation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: white;
+  background-color: #32cd32;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #28a428;
+}
+
+/* Media Query for iPhone Screens */
+@media screen and (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  button {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .navigation-buttons {
+    gap: 5px;
+  }
+}

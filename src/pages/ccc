@@ -1,0 +1,238 @@
+import React, { useState } from "react";
+import ReactSlider from "react-slider";
+import "./App.css";
+
+function BinauralBeats() {
+  const [freqRange, setFreqRange] = useState([10, 30]); // Frequency range
+  const [toneRange, setToneRange] = useState([20, 1500]); // Tone range
+  const [durationMinutes, setDurationMinutes] = useState("");
+  const [intervalSeconds, setIntervalSeconds] = useState("");
+  const [useSlider, setUseSlider] = useState(false); // Toggle between input and slider
+  const [message, setMessage] = useState("");
+  const [isSweeping, setIsSweeping] = useState(false); // Track if sweep is running
+  const [intervalId, setIntervalId] = useState(null); // Store interval ID for stopping
+  const [audioContext, setAudioContext] = useState(null); // Store audio context for stopping
+
+  const playContinuousBinauralBeats = (startFreq, endFreq, durationMinutes, intervalSeconds) => {
+    const durationSeconds = durationMinutes * 60;
+    const beatFrequency = 10; // Fixed beat frequency
+    const freqStep = (endFreq - startFreq) / (durationSeconds / intervalSeconds);
+
+    let currentFreq = startFreq;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    setAudioContext(audioCtx); // Store the audio context
+    const leftGain = audioCtx.createGain();
+    const rightGain = audioCtx.createGain();
+    leftGain.connect(audioCtx.destination);
+    rightGain.connect(audioCtx.destination);
+
+    const leftOscillator = audioCtx.createOscillator();
+    const rightOscillator = audioCtx.createOscillator();
+
+    leftOscillator.frequency.setValueAtTime(currentFreq + beatFrequency / 2, audioCtx.currentTime);
+    rightOscillator.frequency.setValueAtTime(currentFreq - beatFrequency / 2, audioCtx.currentTime);
+
+    leftOscillator.connect(leftGain);
+    rightOscillator.connect(rightGain);
+
+    leftOscillator.start();
+    rightOscillator.start();
+
+    const id = setInterval(() => {
+      currentFreq += freqStep;
+
+      if (currentFreq >= endFreq) {
+        leftOscillator.stop();
+        rightOscillator.stop();
+        clearInterval(id);
+        setIsSweeping(false); // Stop the sweep
+        return;
+      }
+
+      leftOscillator.frequency.setValueAtTime(currentFreq + beatFrequency / 2, audioCtx.currentTime);
+      rightOscillator.frequency.setValueAtTime(currentFreq - beatFrequency / 2, audioCtx.currentTime);
+    }, intervalSeconds * 1000);
+
+    setIntervalId(id); // Store interval ID for stopping
+  };
+
+  const startSweep = () => {
+    const [startFreq, endFreq] = freqRange;
+    if (!durationMinutes || !intervalSeconds) {
+      setMessage("Please fill in all fields.");
+      return;
+    }
+
+    if (startFreq >= endFreq) {
+      setMessage("Start frequency must be less than end frequency.");
+      return;
+    }
+
+    setMessage("Starting frequency sweep...");
+    setIsSweeping(true); // Indicate sweep is running
+    playContinuousBinauralBeats(startFreq, endFreq, durationMinutes, intervalSeconds);
+    setMessage("Frequency sweep completed.");
+  };
+
+  const stopSweep = () => {
+    if (audioContext) {
+      audioContext.close(); // Close audio context to stop sound
+    }
+    if (intervalId) {
+      clearInterval(intervalId); // Clear the interval
+    }
+    setIsSweeping(false); // Reset sweeping state
+    setMessage("Frequency sweep stopped.");
+  };
+
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Binaural Beats Frequency Sweep</h1>
+      </header>
+      <main className="app-main">
+        <div className="toggle-section">
+          <label className="toggle-label">
+            <input
+              type="checkbox"
+              checked={useSlider}
+              onChange={() => setUseSlider(!useSlider)}
+            />
+            Use Slider
+          </label>
+        </div>
+
+        {useSlider ? (
+          <div className="slider-section">
+            <h2>Set Frequencies and Tones with Sliders</h2>
+            <div className="form-group">
+              <label>Frequency Range (10Hz - 50Hz):</label>
+              <ReactSlider
+                min={10}
+                max={50}
+                value={freqRange}
+                onChange={(value) => setFreqRange(value)}
+                className="slider"
+                thumbClassName="thumb"
+                trackClassName="track"
+                pearling
+                minDistance={1} // Ensures a minimum gap between thumbs
+              />
+              <p>
+                {freqRange[0]} Hz - {freqRange[1]} Hz
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label>Tone Range (20Hz - 1500Hz):</label>
+              <ReactSlider
+                min={20}
+                max={1500}
+                value={toneRange}
+                onChange={(value) => setToneRange(value)}
+                className="slider"
+                thumbClassName="thumb"
+                trackClassName="track"
+                pearling
+                minDistance={10} // Ensures a minimum gap between thumbs
+              />
+              <p>
+                {toneRange[0]} Hz - {toneRange[1]} Hz
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="static-section">
+            <h2>Set Frequencies and Tones with Inputs</h2>
+            <div className="form-group">
+              <label>Start Frequency (10Hz - 50Hz):</label>
+              <input
+                type="number"
+                min="10"
+                max="50"
+                value={freqRange[0]}
+                onChange={(e) =>
+                  setFreqRange([Number(e.target.value), freqRange[1]])
+                }
+                placeholder="Enter start frequency"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>End Frequency (10Hz - 50Hz):</label>
+              <input
+                type="number"
+                min="10"
+                max="50"
+                value={freqRange[1]}
+                onChange={(e) =>
+                  setFreqRange([freqRange[0], Number(e.target.value)])
+                }
+                placeholder="Enter end frequency"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Start Tone (20Hz - 1500Hz):</label>
+              <input
+                type="number"
+                min="20"
+                max="1500"
+                value={toneRange[0]}
+                onChange={(e) =>
+                  setToneRange([Number(e.target.value), toneRange[1]])
+                }
+                placeholder="Enter start tone"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>End Tone (20Hz - 1500Hz):</label>
+              <input
+                type="number"
+                min="20"
+                max="1500"
+                value={toneRange[1]}
+                onChange={(e) =>
+                  setToneRange([toneRange[0], Number(e.target.value)])
+                }
+                placeholder="Enter end tone"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>Duration (minutes):</label>
+          <input
+            type="number"
+            value={durationMinutes}
+            onChange={(e) => setDurationMinutes(e.target.value)}
+            placeholder="Enter duration in minutes"
+          />
+        </div>
+        <div className="form-group">
+          <label>Interval (seconds):</label>
+          <input
+            type="number"
+            value={intervalSeconds}
+            onChange={(e) => setIntervalSeconds(e.target.value)}
+            placeholder="Enter interval in seconds"
+          />
+        </div>
+        <button className="start-btn" onClick={startSweep}>
+          Start Sweep
+        </button>
+        {isSweeping && (
+          <button className="stop-btn" onClick={stopSweep}>
+            Stop Sweep
+          </button>
+        )}
+        <p>{message}</p>
+      </main>
+    </div>
+  );
+}
+
+export default BinauralBeats;

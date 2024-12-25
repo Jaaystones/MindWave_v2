@@ -1,0 +1,107 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #32cd32;
+  margin-top: 1rem;
+}
+
+/* Container Styles */
+.static-mode-page {
+  padding: 1rem;
+}
+
+/* Sliders */
+.slider-container {
+  margin: 1rem 0;
+}
+
+.slider {
+  width: 90%;
+  margin: 0 auto;
+}
+
+input[type="range"] {
+  width: 90%;
+}
+
+/* Buttons */
+.control-buttons,
+.navigation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: white;
+  background-color: #32cd32;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #28a428;
+}
+
+/* Frequency/Tone Label */
+label {
+  font-size: 1rem;
+  color: #444;
+}
+
+/* Frequency Display */
+p {
+  font-size: 1.2rem;
+  color: #222;
+}
+
+/* Media Query for iPhone Screens */
+@media screen and (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .slider {
+    width: 100%;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+
+  button {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .control-buttons,
+  .navigation-buttons {
+    gap: 5px;
+  }
+
+  label {
+    font-size: 0.9rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+}
